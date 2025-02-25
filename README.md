@@ -1,13 +1,12 @@
 # 🌟 Blur Generator
 
-Welcome to the **Blur Generator** project! This is a modern web application built with [Next.js](https://nextjs.org), [Shadcn/ui](https://shadcn.dev), and [Supabase](https://supabase.io). Our goal is to provide a sleek and efficient tool for generating blur effects on images. 🚀
+Welcome to the **Blur Generator** project! This is a modern web application built with [Next.js](https://nextjs.org) and [Shadcn/ui](https://shadcn.dev). Our goal is to provide a sleek and efficient tool for generating blur effects on images. 🚀
 
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js
 - **UI Components**: Shadcn/ui
 - **Icons**: Lucide Icons
-- **Backend**: Supabase
 
 ## 🚀 Getting Started
 
@@ -43,7 +42,6 @@ To learn more about the technologies used in this project, take a look at the fo
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Shadcn/ui Documentation](https://shadcn.dev/docs)
-- [Supabase Documentation](https://supabase.io/docs)
 
 ## 🎉 Contributing
 
@@ -55,6 +53,6 @@ This project is licensed under the MIT License.
 
 ## 🌐 Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
