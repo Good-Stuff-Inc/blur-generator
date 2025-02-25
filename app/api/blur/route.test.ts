@@ -6,8 +6,8 @@ const POST = jest.fn(async (request) => {
 })
 
 // Mock the image processing functions
-jest.mock('@/lib/image-processing', () => ({
-  applyBlurToImage: jest.fn().mockResolvedValue(Buffer.from('blurred-image-data')),
+jest.mock('@lib/image-processing', () => ({
+  applyBlur: jest.fn().mockResolvedValue(Buffer.from('blurred-image-data')),
 }))
 
 describe('Blur API Route', () => {
