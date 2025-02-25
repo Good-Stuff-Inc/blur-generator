@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useDropzone, type DropzoneOptions, FileRejection } from "react-dropzone";
+import { useDropzone, type DropzoneOptions, FileRejection, DropEvent } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { Upload, File, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
     }, [value]);
 
     const handleDrop = React.useCallback(
-      (acceptedFiles: File[], rejectedFiles: FileRejection[], event: React.DragEvent<HTMLElement>) => {
+      (acceptedFiles: File[], rejectedFiles: FileRejection[], event: DropEvent) => {
         const newFiles = [...files, ...acceptedFiles];
         setFiles(newFiles);
         
