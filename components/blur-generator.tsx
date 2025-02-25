@@ -1,42 +1,76 @@
 "use client";
-
-import { useState, useRef, useCallback, ChangeEvent } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { ImageUpload } from "@/components/image-upload";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, Shield } from "lucide-react";
+import { toast } from "sonner";
 
 export function BlurGenerator() {
   const [image, setImage] = useState<string | null>(null);
   const [blurAmount, setBlurAmount] = useState<number>(5);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleImageUpload = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setImage(e.target.result as string);
+  // Clean up object URLs on component unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (image && image.startsWith('blob:')) {
+        URL.revokeObjectURL(image);
       }
     };
-    reader.readAsDataURL(file);
-  }, []);
+  }, [image]);
+
+  const handleImageUpload = useCallback((file: File) => {
+    // Revoke previous object URL if it exists
+    if (image && image.startsWith('blob:')) {
+      URL.revokeObjectURL(image);
+    }
+    
+    try {
+      // Create object URL instead of using FileReader for better security
+      const objectUrl = URL.createObjectURL(file);
+      setImage(objectUrl);
+    } catch (error) {
+      toast.error("Failed to process the image. Please try again.");
+      console.error("Error processing image:", error);
+    }
+  }, [image]);
 
   const resetImage = () => {
+    // Revoke object URL if it exists
+    if (image && image.startsWith('blob:')) {
+      URL.revokeObjectURL(image);
+    }
     setImage(null);
     setBlurAmount(5);
   };
 
-  const downloadImage = () => {
+  const downloadImage = async () => {
     if (!canvasRef.current || !image) return;
     
-    const canvas = canvasRef.current;
-    const img = new Image();
+    setIsProcessing(true);
     
-    img.onload = () => {
+    try {
+      const canvas = canvasRef.current;
+      const img = new Image();
+      
+      // Create a promise to handle the image loading
+      const imageLoaded = new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = image;
+      });
+      
+      // Wait for the image to load
+      await imageLoaded;
+      
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        throw new Error("Failed to get canvas context");
+      }
       
       // Set canvas dimensions to match image
       canvas.width = img.width;
@@ -46,18 +80,49 @@ export function BlurGenerator() {
       ctx.filter = `blur(${blurAmount}px)`;
       ctx.drawImage(img, 0, 0);
       
-      // Create download link
+      // Create download link with a timestamped filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const link = document.createElement('a');
-      link.download = 'blurred-image.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    };
-    
-    img.src = image;
+      link.download = `blurred-image-${timestamp}.png`;
+      
+      // Use toBlob for better memory management with large images
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error("Failed to create image blob");
+        }
+        
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.click();
+        
+        // Clean up after download starts
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 100);
+        
+        toast.success("Image downloaded successfully!");
+      }, 'image/png');
+      
+    } catch (error) {
+      console.error("Error downloading image:", error);
+      toast.error("Failed to download the image. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Privacy Banner */}
+      <Card className="bg-primary/10 border-primary/20">
+        <CardContent className="p-4 flex items-center space-x-3">
+          <Shield className="h-5 w-5 text-primary" />
+          <p className="text-sm">
+            All image processing is done locally in your browser. Your images are never uploaded to any server.
+          </p>
+        </CardContent>
+      </Card>
+      
       {!image ? (
         <ImageUpload onFileSelected={handleImageUpload} />
       ) : (
@@ -109,11 +174,29 @@ export function BlurGenerator() {
               </div>
               
               <div className="flex flex-wrap gap-3">
-                <Button onClick={downloadImage} className="flex-1 sm:flex-none">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
+                <Button 
+                  onClick={downloadImage} 
+                  className="flex-1 sm:flex-none"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </>
+                  )}
                 </Button>
-                <Button variant="outline" onClick={resetImage} className="flex-1 sm:flex-none">
+                <Button 
+                  variant="outline" 
+                  onClick={resetImage} 
+                  className="flex-1 sm:flex-none"
+                  disabled={isProcessing}
+                >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Reset
                 </Button>

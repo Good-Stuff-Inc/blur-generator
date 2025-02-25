@@ -3,7 +3,12 @@
 import { useCallback, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+
+// Define allowed image types and max size (5MB)
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface ImageUploadProps {
   onFileSelected: (file: File) => void;
@@ -11,6 +16,25 @@ interface ImageUploadProps {
 
 export function ImageUpload({ onFileSelected }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const validateFile = (file: File): boolean => {
+    setError(null);
+
+    // Check file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setError(`Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.`);
+      return false;
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`File size exceeds 5MB limit.`);
+      return false;
+    }
+
+    return true;
+  };
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -38,22 +62,29 @@ export function ImageUpload({ onFileSelected }: ImageUploadProps) {
       const files = e.dataTransfer.files;
       if (files && files.length > 0) {
         const file = files[0];
-        if (file.type.startsWith("image/")) {
+        if (validateFile(file)) {
           onFileSelected(file);
+        } else if (error) {
+          toast.error(error);
         }
       }
     },
-    [onFileSelected]
+    [onFileSelected, error]
   );
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (files && files.length > 0) {
-        onFileSelected(files[0]);
+        const file = files[0];
+        if (validateFile(file)) {
+          onFileSelected(file);
+        } else if (error) {
+          toast.error(error);
+        }
       }
     },
-    [onFileSelected]
+    [onFileSelected, error]
   );
 
   return (
@@ -75,6 +106,9 @@ export function ImageUpload({ onFileSelected }: ImageUploadProps) {
           <p className="text-sm text-muted-foreground">
             Drag and drop an image here, or click to select a file
           </p>
+          <p className="text-xs text-muted-foreground">
+            Accepted formats: JPEG, PNG, GIF, WebP (max 5MB)
+          </p>
         </div>
         <div className="flex gap-2">
           <label htmlFor="file-upload">
@@ -82,7 +116,7 @@ export function ImageUpload({ onFileSelected }: ImageUploadProps) {
               id="file-upload"
               type="file"
               className="sr-only"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleFileInput}
             />
             <Button
@@ -98,6 +132,12 @@ export function ImageUpload({ onFileSelected }: ImageUploadProps) {
             </Button>
           </label>
         </div>
+        {error && (
+          <div className="flex items-center text-destructive text-sm">
+            <AlertCircle className="h-4 w-4 mr-1" />
+            {error}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
