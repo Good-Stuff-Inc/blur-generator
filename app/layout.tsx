@@ -9,7 +9,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Blur Generator",
-  description: "Upload and blur images with customizable settings",
+  description: "Generate beautiful blurred images",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
