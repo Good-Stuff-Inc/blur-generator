@@ -35,6 +35,53 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 - **lib/**: Utility functions.
 - **public/**: Static files like images and icons.
 - **app/**: Main application files including global styles and layout.
+- **__tests__/**: Test files for components and utilities.
+
+## 🧪 Testing
+
+This project uses Jest and React Testing Library for testing. The test suite includes:
+
+### Component Tests
+
+- **BlurGenerator**: Tests the main blur generation component, including:
+  - Initial rendering of the upload interface
+  - Transition to blur interface after image upload
+  - Reset functionality to return to the upload interface
+
+- **ImageUpload**: Tests the image upload component, including:
+  - Proper rendering of the upload interface
+  - File input handling
+  - Drag and drop functionality
+  - Style changes during drag interactions
+
+### Utility Tests
+
+- **Image Processing**: Tests the image blur processing utility, ensuring:
+  - Proper buffer handling
+  - Default parameter usage
+
+### Running Tests
+
+To run the tests, use the following commands:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate test coverage report
+npm run test:coverage
+```
+
+### Writing New Tests
+
+When developing new features, please ensure you also write appropriate tests. Follow these guidelines:
+1. Create tests in the `__tests__` directory with a structure that mirrors the project structure
+2. Test component rendering, user interactions, and state changes
+3. Mock external dependencies as needed
+4. Write both unit tests and integration tests as appropriate
 
 ## 📚 Learn More
 
@@ -42,6 +89,8 @@ To learn more about the technologies used in this project, take a look at the fo
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Shadcn/ui Documentation](https://shadcn.dev/docs)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [React Testing Library Documentation](https://testing-library.com/docs/react-testing-library/intro/)
 
 ## 🎉 Contributing
 
